@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,20 +7,58 @@ public class GameManager : MonoBehaviour
 {
     public Sprite[] comingNumberSprites;
     public Sprite[] boardNumberSprites;
-    public Transform upcomingBlockPlace, nextBlockPlace;
-    public GameObject nextBlockPrefab;
-
-    private int state = 0;
+    public Transform upcomingBlockPlace, nextBlockPlace, boardCellsParent;
+    public GameObject nextBlockPrefab, boardBlockPrefab;
     public GameObject upcomingBlock, nextBlock;
+    public Dictionary<GameObject, int> boardCellsDic = new Dictionary<GameObject, int>();
+
+    [NonSerialized]
+    public int nextBlockNumber;
+    [NonSerialized]
+    public bool boardPressed = false;
+
+    private int tempNextBlockNumber;
+    private int state = 0;
+    private GameObject lastPressedCell;
     // Start is called before the first frame update
     void Start()
     {
         nextBlock = nextBlockPlace.transform.GetChild(0).gameObject;
     }
 
+    private void Update()
+    {
+        InputManager();
+    }
+
+    private void InputManager()
+    {
+        if (Input.GetMouseButtonUp(0))
+        {
+            boardPressed = false;
+        }
+    }
+
+    public void PressedOnBoard(GameObject pressedCell)
+    {
+        boardPressed = true;
+        lastPressedCell = pressedCell;
+    }
+
+    public void MouseEnterTo(GameObject mouseEnterCell)
+    {
+        int lastPressedCellNumber = lastPressedCell.GetComponent<BlockCellSc>().filledNumber;
+        if(lastPressedCellNumber > 2)
+        {
+            lastPressedCell.GetComponent<BlockCellSc>().ReplaceBlockOnCell(lastPressedCellNumber / 2);
+            mouseEnterCell.GetComponent<BlockCellSc>().PlaceBlockToCell(lastPressedCellNumber / 2);
+            lastPressedCell = mouseEnterCell;
+        }
+    }
+
     public void SetUpcomingNumber()
     {
-        int randomInt = Random.Range(1, 101);
+        int randomInt = UnityEngine.Random.Range(1, 101);
         int upcomingNumber = 0;
         switch (state)
         {
@@ -59,9 +98,12 @@ public class GameManager : MonoBehaviour
 
                 break;
         }
-        Debug.Log(randomInt + " " + upcomingNumber);
         upcomingBlock = Instantiate(nextBlockPrefab, upcomingBlockPlace);
+        upcomingBlock.GetComponent<NextBlockSc>().blockNumber = upcomingNumber;
         upcomingBlock.GetComponent<SpriteRenderer>().sprite = GetComingBlockSprite(upcomingNumber);
+
+        nextBlockNumber = tempNextBlockNumber;
+        tempNextBlockNumber = upcomingNumber;
     }
 
     public Sprite GetComingBlockSprite(int spawnedNumber)
@@ -135,15 +177,23 @@ public class GameManager : MonoBehaviour
         return upcomingSprite;
     }
 
+    private void FillBoardCellsDic()
+    {
+        foreach(Transform cell in boardCellsParent)
+        {
+            boardCellsDic.Add(cell.gameObject, 0);
+        }
+    }
+
     public void TestUpcoming()
     {
         Destroy(nextBlock.gameObject);
         nextBlock = upcomingBlock.gameObject;
         nextBlock.transform.parent = nextBlockPlace;
-        nextBlock.GetComponent<NextBlockSc>().SetNextBlock();
+        nextBlock.GetComponent<NextBlockSc>().SetNextBlock(tempNextBlockNumber);
+
 
         upcomingBlock = null;
         SetUpcomingNumber();
-
     }
 }

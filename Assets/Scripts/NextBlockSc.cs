@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,9 @@ public class NextBlockSc : MonoBehaviour
     public float nextScale = 1.2f;
     public float scaleSens = 1;
     public float moveSens = 2;
+
+    [NonSerialized]
+    public int blockNumber = 0;
     void Start()
     {
         transform.localScale = Vector3.zero;
@@ -26,8 +30,9 @@ public class NextBlockSc : MonoBehaviour
         }
     }
 
-    public void SetNextBlock()
+    public void SetNextBlock(int number)
     {
+        blockNumber = number;
         InvokeRepeating("ScaleAndMoveToNextBlock", 0, Time.fixedDeltaTime);
     }
 

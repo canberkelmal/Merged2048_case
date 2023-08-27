@@ -302,6 +302,7 @@ MonoBehaviour:
   upcomingBlockPlace: {fileID: 1415589732}
   nextBlockPlace: {fileID: 1566173676}
   nextBlockPrefab: {fileID: 2471721031328460163, guid: 369a7cb0da874864a8192e849f60489f, type: 3}
+  boardBlockPrefab: {fileID: 5247209174002598523, guid: b2dac23e5e408624fa3e00104b0485c8, type: 3}
   upcomingBlock: {fileID: 2005597371}
   nextBlock: {fileID: 0}
 --- !u!4 &169288761
