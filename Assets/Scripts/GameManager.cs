@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public Sprite[] comingNumberSprites;
+    public Sprite[] boardNumberSprites;
     public Transform upcomingBlockPlace, nextBlockPlace;
     public GameObject nextBlockPrefab;
 
@@ -59,10 +60,11 @@ public class GameManager : MonoBehaviour
                 break;
         }
         Debug.Log(randomInt + " " + upcomingNumber);
-        SpawnUpcoming(upcomingNumber);
+        upcomingBlock = Instantiate(nextBlockPrefab, upcomingBlockPlace);
+        upcomingBlock.GetComponent<SpriteRenderer>().sprite = GetComingBlockSprite(upcomingNumber);
     }
 
-    public void SpawnUpcoming(int spawnedNumber)
+    public Sprite GetComingBlockSprite(int spawnedNumber)
     {
         Sprite upcomingSprite = null;
         switch (spawnedNumber)
@@ -89,8 +91,48 @@ public class GameManager : MonoBehaviour
                 upcomingSprite = comingNumberSprites[6];
                 break;
         }
-        upcomingBlock = Instantiate(nextBlockPrefab, upcomingBlockPlace);
-        upcomingBlock.GetComponent<SpriteRenderer>().sprite = upcomingSprite;
+        return upcomingSprite;
+    }
+    public Sprite GetBoardBlockSprite(int spawnedNumber)
+    {
+        Sprite upcomingSprite = null;
+        switch (spawnedNumber)
+        {
+            case 2:
+                upcomingSprite = boardNumberSprites[0];
+                break;
+            case 4:
+                upcomingSprite = boardNumberSprites[1];
+                break;
+            case 8:
+                upcomingSprite = boardNumberSprites[2];
+                break;
+            case 16:
+                upcomingSprite = boardNumberSprites[3];
+                break;
+            case 32:
+                upcomingSprite = boardNumberSprites[4];
+                break;
+            case 64:
+                upcomingSprite = boardNumberSprites[5];
+                break;
+            case 128:
+                upcomingSprite = boardNumberSprites[6];
+                break;
+            case 256:
+                upcomingSprite = boardNumberSprites[7];
+                break;
+            case 512:
+                upcomingSprite = boardNumberSprites[8];
+                break;
+            case 1024:
+                upcomingSprite = boardNumberSprites[9];
+                break;
+            case 2048:
+                upcomingSprite = boardNumberSprites[10];
+                break;
+        }
+        return upcomingSprite;
     }
 
     public void TestUpcoming()
