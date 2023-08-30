@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,11 +12,17 @@ public class GameManager : MonoBehaviour
     public GameObject nextBlockPrefab, boardBlockPrefab;
     public GameObject upcomingBlock, nextBlock;
     public Dictionary<GameObject, int> boardCellsDic = new Dictionary<GameObject, int>();
+    public List<GameObject> placedCells = new List<GameObject>();
+    public float boardDetectRadius = 2;
+    public LayerMask boardBlockLayerMask;
+
 
     [NonSerialized]
     public int nextBlockNumber;
     [NonSerialized]
     public bool boardPressed = false;
+    //[NonSerialized]
+    public bool controller = true;
 
     private int tempNextBlockNumber;
     private int state = 0;
@@ -33,16 +40,72 @@ public class GameManager : MonoBehaviour
 
     private void InputManager()
     {
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0) && controller)
         {
             boardPressed = false;
+            ReleasedOnBoard();
         }
+    }
+
+    public void ReleasedOnBoard()
+    {
+        int groupId = 1;
+        // Set blocks sameNeighbours
+        foreach (Transform cell in boardCellsParent)
+        {
+            if(cell.childCount>0)
+            {
+                cell.GetChild(0).GetComponent<BoardBlockSc>().ResetSameNeighbours();
+            }
+        }
+
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                BoardBlockSc blockSc = cell.GetChild(0).GetComponent<BoardBlockSc>();
+                if(blockSc.GetSameNeighbours().Count > 1 && blockSc.groupId == 0)
+                {
+                    Debug.Log(blockSc.blockValue + "id:" + groupId);
+                    blockSc.SetNeighboursGroupId(groupId);
+                    groupId++;
+                }
+            }
+        }
+        //ClearPlacedCells();
+    }
+
+    public void ResetGroupingValues()
+    {
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                cell.GetChild(0).GetComponent<BoardBlockSc>().ResetGrouping();
+            }
+        }
+    }
+
+    public void CheckPlacedCells()
+    {
+
+    }
+
+    public void AddToPlacedCells(GameObject pressedCell)
+    {
+        placedCells.Add(pressedCell);
+    }
+
+    public void ClearPlacedCells()
+    {
+        placedCells.Clear();
     }
 
     public void PressedOnBoard(GameObject pressedCell)
     {
         boardPressed = true;
         lastPressedCell = pressedCell;
+        AddToPlacedCells(pressedCell);
     }
 
     public void MouseEnterTo(GameObject mouseEnterCell)
@@ -53,6 +116,7 @@ public class GameManager : MonoBehaviour
             lastPressedCell.GetComponent<BlockCellSc>().ReplaceBlockOnCell(lastPressedCellNumber / 2);
             mouseEnterCell.GetComponent<BlockCellSc>().PlaceBlockToCell(lastPressedCellNumber / 2);
             lastPressedCell = mouseEnterCell;
+            AddToPlacedCells(mouseEnterCell);
         }
     }
 

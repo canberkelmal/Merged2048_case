@@ -20,12 +20,20 @@ public class BlockCellSc : MonoBehaviour
     }
     private void OnMouseDown()
     {
-        if (!filled)
+        if (!filled && gameManager.controller)
         {
+            gameManager.ResetGroupingValues();
             filled = true;
             PlaceBlockToCell(gameManager.nextBlockNumber);
             gameManager.PressedOnBoard(gameObject);
             gameManager.TestUpcoming();
+        }
+    }
+    private void OnMouseEnter()
+    {
+        if(!filled && gameManager.boardPressed && gameManager.controller)
+        {
+            gameManager.MouseEnterTo(gameObject);
         }
     }
 
@@ -33,24 +41,12 @@ public class BlockCellSc : MonoBehaviour
     {
         placedBlock = Instantiate(gameManager.boardBlockPrefab, transform);
         filledNumber = placedNumber;
-        placedBlock.GetComponent<SpriteRenderer>().sprite = gameManager.GetBoardBlockSprite(placedNumber);
-        placedBlock.transform.localPosition = Vector3.forward * (-1f);
+        placedBlock.GetComponent<BoardBlockSc>().SetBlockValue(placedNumber);
     }
 
     public void ReplaceBlockOnCell(int placedNumber)
     {
-        Destroy(placedBlock.gameObject);
-        placedBlock = Instantiate(gameManager.boardBlockPrefab, transform);
         filledNumber = placedNumber;
-        placedBlock.GetComponent<SpriteRenderer>().sprite = gameManager.GetBoardBlockSprite(placedNumber);
-        placedBlock.transform.localPosition = Vector3.forward * (-1f);
-    }
-
-    private void OnMouseEnter()
-    {
-        if(!filled && gameManager.boardPressed)
-        {
-            gameManager.MouseEnterTo(gameObject);
-        }
+        placedBlock.GetComponent<BoardBlockSc>().SetBlockValue(placedNumber);
     }
 }
