@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
 
     private void InputManager()
     {
-        if (Input.GetMouseButtonUp(0) && controller)
+        if (Input.GetMouseButtonUp(0) && controller && boardPressed)
         {
             boardPressed = false;
             ReleasedOnBoard();
@@ -59,6 +59,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        // Set group id's
         foreach (Transform cell in boardCellsParent)
         {
             if (cell.childCount > 0)
@@ -72,7 +73,30 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+        BoardBlockSc lastPressedBlockSc = lastPressedCell.transform.GetChild(0).GetComponent<BoardBlockSc>();
+
+        if (lastPressedBlockSc.groupId > 0 && GroupCount(lastPressedBlockSc.groupId)>=3)
+        {
+            Debug.Log("Group " + lastPressedBlockSc.groupId + " has " + GroupCount(lastPressedBlockSc.groupId) + " members.");
+        }
         //ClearPlacedCells();
+    }
+
+    public int GroupCount(int groupIndex)
+    {
+        int count = 0;
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                BoardBlockSc blockSc = cell.GetChild(0).GetComponent<BoardBlockSc>();
+                if(blockSc.groupId == groupIndex)
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
     public void ResetGroupingValues()
