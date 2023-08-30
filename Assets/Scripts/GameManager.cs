@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public Dictionary<GameObject, int> boardCellsDic = new Dictionary<GameObject, int>();
     public List<GameObject> placedCells = new List<GameObject>();
     public float boardDetectRadius = 2;
+    public float detectTolerance = 0.05f;
     public LayerMask boardBlockLayerMask;
     public int mergingGroup;
     public GameObject mergingCenterBlock;
@@ -54,6 +55,7 @@ public class GameManager : MonoBehaviour
     public void ReleasedOnBoard()
     {
         int groupId = 1;
+        controller = false;
         // Set blocks sameNeighbours
         foreach (Transform cell in boardCellsParent)
         {
@@ -88,7 +90,90 @@ public class GameManager : MonoBehaviour
 
             lastPressedCell = null;
         }
+        else
+        {
+            controller = true;
+        }
         //ClearPlacedCells();
+    }
+
+    public void RecheckBoardToMerge()
+    {
+        ResetGroupingValues();
+        int groupId = 1;
+        //controller = false;
+        // Set blocks sameNeighbours
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                cell.GetChild(0).GetComponent<BoardBlockSc>().ResetSameNeighbours();
+            }
+        }
+
+        // Set group id's
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                BoardBlockSc blockSc = cell.GetChild(0).GetComponent<BoardBlockSc>();
+                if (blockSc.GetSameNeighbours().Count > 1 && blockSc.groupId == 0)
+                {
+                    Debug.Log(blockSc.blockValue + "id:" + groupId);
+                    blockSc.SetNeighboursGroupId(groupId);
+                    groupId++;
+                }
+            }
+        }
+
+        for(int i = 1; i <= 9;  i++)
+        {
+            if(GroupCount(i)>=3)
+            {
+                controller = false;
+                MergeGroup(i);
+                break;
+            }
+        }
+    }
+
+    public void MergeGroup(int mergingGroupId)
+    {
+        lastPressedCell = CheckTheCenterBlockInGroup(mergingGroupId).transform.parent.gameObject;
+        ReleasedOnBoard();
+    }
+
+    public GameObject CheckTheCenterBlockInGroup(int id)
+    {
+        GameObject centerBlock = null;
+        float dist = 999f;
+        Vector3 sum = Vector2.zero;
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                BoardBlockSc blockSc = cell.GetChild(0).GetComponent<BoardBlockSc>();
+                if (blockSc.groupId == id)
+                {
+                    sum += cell.GetChild(0).position;
+                }
+            }
+        }
+
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                BoardBlockSc blockSc = cell.GetChild(0).GetComponent<BoardBlockSc>();
+                if (blockSc.groupId == id && Vector2.Distance(sum/GroupCount(id), cell.GetChild(0).position) < dist)
+                {
+                    dist = Vector2.Distance(sum / GroupCount(id), cell.GetChild(0).position);
+                    centerBlock = cell.GetChild(0).gameObject;
+                }
+            }
+        }
+
+        return centerBlock;
     }
 
     public void SetMergingGroup(GameObject mergeCenter, int groupId)
@@ -106,7 +191,10 @@ public class GameManager : MonoBehaviour
         else if(!merged)
         {
             merged = true;
+            controller = true;
             mergingCenterBlock.transform.parent.GetComponent<BlockCellSc>().ReplaceBlockOnCell(mergingCenterBlock.GetComponent<BoardBlockSc>().blockValue * 2);
+            //RecheckBoardToMerge();
+            Invoke("RecheckBoardToMerge", 0.1f);
         }
     }
 
@@ -175,13 +263,13 @@ public class GameManager : MonoBehaviour
                 if (blockSc.groupId == block.GetComponent<BoardBlockSc>().groupId)
                 {
                     float dist = Vector2.Distance(cell.GetChild(0).transform.position, block.transform.position);
-                    if (dist > farthestDistance)
+                    if (dist >= farthestDistance + detectTolerance)
                     {
                         farthestDistance = dist;
                         farthestBlocks.Clear();
                         farthestBlocks.Add(cell.GetChild(0).gameObject);
                     }
-                    else if (dist == farthestDistance)
+                    else if (dist < farthestDistance + detectTolerance && dist >= farthestDistance - detectTolerance)
                     {
                         farthestBlocks.Add(cell.GetChild(0).gameObject);
                     }
