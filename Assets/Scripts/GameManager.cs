@@ -16,6 +16,9 @@ public class GameManager : MonoBehaviour
     public List<GameObject> placedCells = new List<GameObject>();
     public float boardDetectRadius = 2;
     public LayerMask boardBlockLayerMask;
+    public int mergingGroup;
+    public GameObject mergingCenterBlock;
+    public bool merged = false;
 
 
     [NonSerialized]
@@ -81,12 +84,30 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("Group " + lastPressedBlockSc.groupId + " has " + GroupCount(lastPressedBlockSc.groupId) + " members.");
             lastPressedBlockSc.MergeGroup(true);
+            SetMergingGroup(lastPressedCell.transform.GetChild(0).gameObject, lastPressedBlockSc.groupId);
 
             lastPressedCell = null;
         }
-
-
         //ClearPlacedCells();
+    }
+
+    public void SetMergingGroup(GameObject mergeCenter, int groupId)
+    {
+        mergingGroup = groupId;
+        mergingCenterBlock = mergeCenter;
+    } 
+
+    public void ContinueMerge()
+    {
+        if(GroupCount(mergingGroup) > 1)
+        {
+            mergingCenterBlock.GetComponent<BoardBlockSc>().MergeGroup(true);
+        }
+        else if(!merged)
+        {
+            merged = true;
+            mergingCenterBlock.transform.parent.GetComponent<BlockCellSc>().ReplaceBlockOnCell(mergingCenterBlock.GetComponent<BoardBlockSc>().blockValue * 2);
+        }
     }
 
     public int GroupCount(int groupIndex)
@@ -108,6 +129,7 @@ public class GameManager : MonoBehaviour
 
     public void ResetGroupingValues()
     {
+        merged = false;
         foreach (Transform cell in boardCellsParent)
         {
             if (cell.childCount > 0)

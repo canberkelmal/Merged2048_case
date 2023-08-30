@@ -49,4 +49,11 @@ public class BlockCellSc : MonoBehaviour
         filledNumber = placedNumber;
         placedBlock.GetComponent<BoardBlockSc>().SetBlockValue(placedNumber);
     }
+
+    public void EmptyCell()
+    {
+        filledNumber = 0;
+        filled = false;
+        placedBlock = null;
+    }
 }

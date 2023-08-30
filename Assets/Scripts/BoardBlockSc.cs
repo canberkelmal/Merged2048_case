@@ -50,7 +50,7 @@ public class BoardBlockSc : MonoBehaviour
 
     public void MergeGroup(bool isLastPressed)
     {
-        if(isLastPressed)
+        if (isLastPressed)
         {
             MergeFarthest();
         }
@@ -68,6 +68,7 @@ public class BoardBlockSc : MonoBehaviour
     public void MergeToNearestBlock()
     {
         nearestBlock = gameManager.NearestSameGroupBlock(gameObject);
+        transform.parent.GetComponent<BlockCellSc>().EmptyCell();
         transform.parent = nearestBlock.transform.parent;
         Debug.Log(transform.parent.gameObject.name);
         InvokeRepeating("MergeAnim", 0, Time.fixedDeltaTime);
@@ -78,9 +79,10 @@ public class BoardBlockSc : MonoBehaviour
         transform.localPosition = Vector3.MoveTowards(transform.localPosition, Vector3.forward * (-1f), gameManager.mergeSens * Time.deltaTime);
         if(transform.localPosition == Vector3.forward * (-1f))
         {
-            //Destroy(gameObject);
             Debug.Log("Merged");
+            gameManager.ContinueMerge();
             CancelInvoke("MergeAnim");
+            Destroy(gameObject);
         }
     }
 
