@@ -6,6 +6,7 @@ using static Unity.Collections.AllocatorManager;
 
 public class GameManager : MonoBehaviour
 {
+    public float mergeSens = 1f;
     public Sprite[] comingNumberSprites;
     public Sprite[] boardNumberSprites;
     public Transform upcomingBlockPlace, nextBlockPlace, boardCellsParent;
@@ -75,10 +76,16 @@ public class GameManager : MonoBehaviour
         }
         BoardBlockSc lastPressedBlockSc = lastPressedCell.transform.GetChild(0).GetComponent<BoardBlockSc>();
 
-        if (lastPressedBlockSc.groupId > 0 && GroupCount(lastPressedBlockSc.groupId)>=3)
+        // If last placed has mergeble group
+        if (lastPressedBlockSc.groupId > 0 && GroupCount(lastPressedBlockSc.groupId)>=3 && lastPressedCell != null)
         {
             Debug.Log("Group " + lastPressedBlockSc.groupId + " has " + GroupCount(lastPressedBlockSc.groupId) + " members.");
+            lastPressedBlockSc.MergeGroup(true);
+
+            lastPressedCell = null;
         }
+
+
         //ClearPlacedCells();
     }
 
@@ -108,6 +115,58 @@ public class GameManager : MonoBehaviour
                 cell.GetChild(0).GetComponent<BoardBlockSc>().ResetGrouping();
             }
         }
+    }
+
+    public GameObject NearestSameGroupBlock(GameObject block)
+    {
+        float nearestDistance = -1f;
+        GameObject nearestBlock = null;
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                BoardBlockSc blockSc = cell.GetChild(0).GetComponent<BoardBlockSc>();
+
+                if (blockSc.groupId == block.GetComponent<BoardBlockSc>().groupId && block != cell.GetChild(0).gameObject)
+                {
+                    float dist = Vector2.Distance(cell.GetChild(0).transform.position, block.transform.position);
+                    if (nearestDistance == -1 || dist < nearestDistance)
+                    {
+                        nearestDistance = dist;
+                        nearestBlock = cell.GetChild(0).gameObject;
+                    }
+                }
+            }
+        }
+        return nearestBlock;
+    }
+    public List<GameObject> FarthestSameGroupBlock(GameObject block)
+    {
+        float farthestDistance = 0f;
+        List<GameObject> farthestBlocks = new List<GameObject>();
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                BoardBlockSc blockSc = cell.GetChild(0).GetComponent<BoardBlockSc>();
+
+                if (blockSc.groupId == block.GetComponent<BoardBlockSc>().groupId)
+                {
+                    float dist = Vector2.Distance(cell.GetChild(0).transform.position, block.transform.position);
+                    if (dist > farthestDistance)
+                    {
+                        farthestDistance = dist;
+                        farthestBlocks.Clear();
+                        farthestBlocks.Add(cell.GetChild(0).gameObject);
+                    }
+                    else if (dist == farthestDistance)
+                    {
+                        farthestBlocks.Add(cell.GetChild(0).gameObject);
+                    }
+                }
+            }
+        }
+        return farthestBlocks;
     }
 
     public void CheckPlacedCells()

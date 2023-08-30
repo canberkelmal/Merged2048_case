@@ -11,6 +11,7 @@ public class BoardBlockSc : MonoBehaviour
 
     private GameManager gameManager;
     private bool checkedForGroupId = false;
+    private GameObject nearestBlock;
     private void Awake()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -44,6 +45,42 @@ public class BoardBlockSc : MonoBehaviour
             {
                 neig.GetComponent<BoardBlockSc>().SetNeighboursGroupId(groupId);
             }
+        }
+    }
+
+    public void MergeGroup(bool isLastPressed)
+    {
+        if(isLastPressed)
+        {
+            MergeFarthest();
+        }
+    }
+
+    public void MergeFarthest()
+    {
+        List<GameObject> farthestBlocks = gameManager.FarthestSameGroupBlock(gameObject);
+        foreach (GameObject farhest in farthestBlocks)
+        {
+            farhest.GetComponent<BoardBlockSc>().MergeToNearestBlock();
+        }
+    }
+
+    public void MergeToNearestBlock()
+    {
+        nearestBlock = gameManager.NearestSameGroupBlock(gameObject);
+        transform.parent = nearestBlock.transform.parent;
+        Debug.Log(transform.parent.gameObject.name);
+        InvokeRepeating("MergeAnim", 0, Time.fixedDeltaTime);
+    }
+
+    public void MergeAnim()
+    {
+        transform.localPosition = Vector3.MoveTowards(transform.localPosition, Vector3.forward * (-1f), gameManager.mergeSens * Time.deltaTime);
+        if(transform.localPosition == Vector3.forward * (-1f))
+        {
+            //Destroy(gameObject);
+            Debug.Log("Merged");
+            CancelInvoke("MergeAnim");
         }
     }
 

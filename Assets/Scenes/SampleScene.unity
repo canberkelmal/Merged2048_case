@@ -279,6 +279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 948825401f72d10459bf66693fdedbc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mergeSens: 10
   comingNumberSprites:
   - {fileID: 21300000, guid: 2acde69ddd5ab584e99ad6e0baedac01, type: 3}
   - {fileID: 21300000, guid: b7342c91918f4b444ab9d06e9efdd140, type: 3}
