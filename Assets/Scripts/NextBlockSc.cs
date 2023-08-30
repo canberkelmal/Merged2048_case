@@ -10,7 +10,7 @@ public class NextBlockSc : MonoBehaviour
     public float scaleSens = 1;
     public float moveSens = 2;
 
-    [NonSerialized]
+    //[NonSerialized]
     public int blockNumber = 0;
     void Start()
     {
@@ -32,6 +32,7 @@ public class NextBlockSc : MonoBehaviour
 
     public void SetNextBlock(int number)
     {
+        CancelInvoke("ScaleToUpcoming");
         blockNumber = number;
         InvokeRepeating("ScaleAndMoveToNextBlock", 0, Time.fixedDeltaTime);
     }

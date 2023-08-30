@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using static Unity.Collections.AllocatorManager;
 
 public class GameManager : MonoBehaviour
@@ -11,7 +12,7 @@ public class GameManager : MonoBehaviour
     public Sprite[] boardNumberSprites;
     public Transform upcomingBlockPlace, nextBlockPlace, boardCellsParent;
     public GameObject nextBlockPrefab, boardBlockPrefab;
-    public GameObject upcomingBlock, nextBlock;
+    public GameObject upcomingBlock, nextBlock, appearScorePrefab;
     public Dictionary<GameObject, int> boardCellsDic = new Dictionary<GameObject, int>();
     public List<GameObject> placedCells = new List<GameObject>();
     public float boardDetectRadius = 2;
@@ -20,6 +21,9 @@ public class GameManager : MonoBehaviour
     public int mergingGroup;
     public GameObject mergingCenterBlock;
     public bool merged = false;
+    public int score = 0;
+    public int tempAddedScore = 0;
+    public Text scoreTx;
 
 
     [NonSerialized]
@@ -36,6 +40,9 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         nextBlock = nextBlockPlace.transform.GetChild(0).gameObject;
+        nextBlockNumber = nextBlock.GetComponent<NextBlockSc>().blockNumber;
+        nextBlock.GetComponent<NextBlockSc>().SetNextBlock(nextBlock.GetComponent<NextBlockSc>().blockNumber);
+        tempNextBlockNumber = upcomingBlock.GetComponent<NextBlockSc>().blockNumber;
     }
 
     private void Update()
@@ -85,6 +92,7 @@ public class GameManager : MonoBehaviour
         if (lastPressedBlockSc.groupId > 0 && GroupCount(lastPressedBlockSc.groupId)>=3 && lastPressedCell != null)
         {
             Debug.Log("Group " + lastPressedBlockSc.groupId + " has " + GroupCount(lastPressedBlockSc.groupId) + " members.");
+            tempAddedScore = lastPressedBlockSc.blockValue * GroupCount(lastPressedBlockSc.groupId);
             lastPressedBlockSc.MergeGroup(true);
             SetMergingGroup(lastPressedCell.transform.GetChild(0).gameObject, lastPressedBlockSc.groupId);
 
@@ -92,7 +100,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            controller = true;
+            RecheckBoardToMerge();
         }
         //ClearPlacedCells();
     }
@@ -126,6 +134,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        controller = true;
         for(int i = 1; i <= 9;  i++)
         {
             if(GroupCount(i)>=3)
@@ -182,6 +191,16 @@ public class GameManager : MonoBehaviour
         mergingCenterBlock = mergeCenter;
     } 
 
+    public void SetScore(GameObject block, int sc)
+    {
+        Vector3 blockScreenPosition = Camera.main.WorldToScreenPoint(block.transform.position + Vector3.up);
+        GameObject scoreAnim = Instantiate(appearScorePrefab, blockScreenPosition, Quaternion.identity, scoreTx.transform.parent);
+        scoreAnim.GetComponent<Text>().text = "+" + sc.ToString();
+
+        score += sc;
+        scoreTx.text = score.ToString();
+    }
+
     public void ContinueMerge()
     {
         if(GroupCount(mergingGroup) > 1)
@@ -190,6 +209,7 @@ public class GameManager : MonoBehaviour
         }
         else if(!merged)
         {
+            SetScore(mergingCenterBlock, tempAddedScore);
             merged = true;
             controller = true;
             mergingCenterBlock.transform.parent.GetComponent<BlockCellSc>().ReplaceBlockOnCell(mergingCenterBlock.GetComponent<BoardBlockSc>().blockValue * 2);

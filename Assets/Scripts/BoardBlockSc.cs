@@ -7,6 +7,7 @@ public class BoardBlockSc : MonoBehaviour
 {
     public int blockValue = 0;
     public int groupId = 0;
+    public float scaleSens = 10;
     public List<GameObject> sameNeighbours = new List<GameObject>();
 
     private GameManager gameManager;
@@ -15,6 +16,15 @@ public class BoardBlockSc : MonoBehaviour
     private void Awake()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        InvokeRepeating("ScaleToBoard", 0, Time.fixedDeltaTime);
+    }
+    private void ScaleToBoard()
+    {
+        transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.one, scaleSens * Time.deltaTime);
+        if (transform.localScale.x == 1)
+        {
+            CancelInvoke("ScaleToBoard");
+        }
     }
     public void SetBlockValue(int value)
     {
