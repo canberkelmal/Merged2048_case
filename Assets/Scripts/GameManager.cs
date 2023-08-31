@@ -178,7 +178,7 @@ public class GameManager : MonoBehaviour
         }
 
         nextBlock.GetComponent<NextBlockSc>().blockNumber = upcomingNumber;
-        nextBlock.GetComponent<SpriteRenderer>().sprite = GetComingBlockSprite(upcomingNumber);
+        nextBlock.GetComponent<SpriteRenderer>().sprite = GetBoardBlockSprite(upcomingNumber);
 
         nextBlock.GetComponent<NextBlockSc>().SetNextBlock(upcomingNumber);
 
@@ -737,7 +737,7 @@ public class GameManager : MonoBehaviour
         }
         upcomingBlock = Instantiate(nextBlockPrefab, upcomingBlockPlace);
         upcomingBlock.GetComponent<NextBlockSc>().blockNumber = upcomingNumber;
-        upcomingBlock.GetComponent<SpriteRenderer>().sprite = GetComingBlockSprite(upcomingNumber);
+        upcomingBlock.GetComponent<SpriteRenderer>().sprite = GetBoardBlockSprite(upcomingNumber);
 
         nextBlockNumber = tempNextBlockNumber;
         tempNextBlockNumber = upcomingNumber;
