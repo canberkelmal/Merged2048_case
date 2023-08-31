@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     public List<GameObject> placedCells = new List<GameObject>();
     public float boardDetectRadius = 2;
     public float detectTolerance = 0.05f;
-    public LayerMask boardBlockLayerMask;
+    public LayerMask boardBlockLayerMask, boardCellLayerMask;
     public int mergingGroup;
     public GameObject mergingCenterBlock;
     public bool merged = false;
@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
 
     private int tempNextBlockNumber;
     private int state = 0;
-    private GameObject lastPressedCell;
+    public GameObject lastPressedCell;
     // Start is called before the first frame update
     void Start()
     {
@@ -57,6 +57,45 @@ public class GameManager : MonoBehaviour
             boardPressed = false;
             ReleasedOnBoard();
         }
+    }
+
+    private void SetState()
+    {
+        int largestBlock = LargestBlockValue();
+        if(largestBlock < 256)
+        {
+            state = 0;
+        }
+        else if (largestBlock < 512)
+        {
+            state = 1;
+        }
+        else if (largestBlock < 1024)
+        {
+            state = 2;
+        }
+        else
+        {
+            state = 3;
+        }
+
+    }
+
+    private int LargestBlockValue()
+    {
+        int tempValue = 0;
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount > 0)
+            {
+                BoardBlockSc blockSc = cell.GetChild(0).GetComponent<BoardBlockSc>();
+                if (blockSc.blockValue > tempValue)
+                {
+                    tempValue = blockSc.blockValue;
+                }
+            }
+        }
+        return tempValue;
     }
 
     public void ReleasedOnBoard()
@@ -309,6 +348,19 @@ public class GameManager : MonoBehaviour
         placedCells.Add(pressedCell);
     }
 
+    public bool MemberOfPlaced(GameObject enteredCell)
+    {
+        bool a = false;
+        foreach (GameObject cell in placedCells)
+        {
+            if(cell == enteredCell)
+            {
+                a = true;
+            }
+        }
+        return a;
+    }
+
     public void ClearPlacedCells()
     {
         placedCells.Clear();
@@ -332,47 +384,169 @@ public class GameManager : MonoBehaviour
             AddToPlacedCells(mouseEnterCell);
         }
     }
+    public void MouseEnterToFilled(GameObject mouseEnterCell)
+    {
+        List<GameObject> tempPlacedCells = new List<GameObject>();
+        bool remover = false;
+        for(int i = 0; i < placedCells.Count; i++)
+        {
+            if(!remover)
+            {
+                tempPlacedCells.Add(placedCells[i]);
+            }
+            else
+            {
+                Destroy(placedCells[i].transform.GetChild(0).gameObject);
+                placedCells[i].GetComponent<BlockCellSc>().EmptyCell();
+            }
+
+            if(placedCells[i] == mouseEnterCell && mouseEnterCell != lastPressedCell)
+            {
+                remover = true;
+            }
+        }
+
+        int enterCellValue = mouseEnterCell.transform.GetChild(0).GetComponent<BoardBlockSc>().blockValue;
+        Debug.Log("Entered cell value: " + enterCellValue);
+        mouseEnterCell.GetComponent<BlockCellSc>().ReplaceBlockOnCell(enterCellValue * 2);
+        lastPressedCell = mouseEnterCell;
+
+        placedCells = tempPlacedCells;
+    }
 
     public void SetUpcomingNumber()
     {
+        SetState();
         int randomInt = UnityEngine.Random.Range(1, 101);
         int upcomingNumber = 0;
         switch (state)
         {
             case 0:
-                if(randomInt <= 10)
+                if (randomInt <= 10)
                 {
                     upcomingNumber = 2;
                 }
-                else if (randomInt > 10 && randomInt <=20)
+                else if (randomInt <= 20)
                 {
                     upcomingNumber = 4;
                 }
-                else if (randomInt > 20 && randomInt <= 40)
+                else if (randomInt <= 40)
                 {
                     upcomingNumber = 8;
                 }
-                else if (randomInt > 40 && randomInt <= 60)
+                else if (randomInt <= 60)
                 {
                     upcomingNumber = 16;
                 }
-                else if (randomInt > 60 && randomInt <= 80)
+                else if (randomInt <= 80)
                 {
                     upcomingNumber = 32;
                 }
-                else if (randomInt > 80)
+                else
                 {
                     upcomingNumber = 64;
                 }
                 break;
+
             case 1:
-
+                if (randomInt <= 5)
+                {
+                    upcomingNumber = 2;
+                }
+                else if (randomInt <= 13)
+                {
+                    upcomingNumber = 4;
+                }
+                else if (randomInt <= 28)
+                {
+                    upcomingNumber = 8;
+                }
+                else if (randomInt <= 48)
+                {
+                    upcomingNumber = 16;
+                }
+                else if (randomInt <= 78)
+                {
+                    upcomingNumber = 32;
+                }
+                else if (randomInt <= 98)
+                {
+                    upcomingNumber = 64;
+                }
+                else
+                {
+                    upcomingNumber = 128;
+                }
                 break;
+
             case 2:
-
+                if (randomInt <= 1)
+                {
+                    upcomingNumber = 2;
+                }
+                else if (randomInt <= 3)
+                {
+                    upcomingNumber = 4;
+                }
+                else if (randomInt <= 18)
+                {
+                    upcomingNumber = 8;
+                }
+                else if (randomInt <= 38)
+                {
+                    upcomingNumber = 16;
+                }
+                else if (randomInt <= 68)
+                {
+                    upcomingNumber = 32;
+                }
+                else if (randomInt <= 93)
+                {
+                    upcomingNumber = 64;
+                }
+                else if (randomInt <= 98)
+                {
+                    upcomingNumber = 128;
+                }
+                else
+                {
+                    upcomingNumber = 256;
+                }
                 break;
-            case 3:
 
+            case 3:
+                if (randomInt <= 1)
+                {
+                    upcomingNumber = 2;
+                }
+                else if (randomInt <= 3)
+                {
+                    upcomingNumber = 4;
+                }
+                else if (randomInt <= 13)
+                {
+                    upcomingNumber = 8;
+                }
+                else if (randomInt <= 33)
+                {
+                    upcomingNumber = 16;
+                }
+                else if (randomInt <= 60)
+                {
+                    upcomingNumber = 32;
+                }
+                else if (randomInt <= 85)
+                {
+                    upcomingNumber = 64;
+                }
+                else if (randomInt <= 95)
+                {
+                    upcomingNumber = 128;
+                }
+                else
+                {
+                    upcomingNumber = 256;
+                }
                 break;
         }
         upcomingBlock = Instantiate(nextBlockPrefab, upcomingBlockPlace);

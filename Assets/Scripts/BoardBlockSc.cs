@@ -18,6 +18,17 @@ public class BoardBlockSc : MonoBehaviour
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         InvokeRepeating("ScaleToBoard", 0, Time.fixedDeltaTime);
     }
+    /*private void OnMouseEnter()
+    {
+        if (gameManager.boardPressed && gameManager.controller)
+        {
+            if (transform.parent.GetComponent<BlockCellSc>().filled && gameManager.MemberOfPlaced(transform.parent.gameObject))
+            {
+                gameManager.MouseEnterToFilled(gameObject);
+            }
+        }
+    }*/
+
     private void ScaleToBoard()
     {
         transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.one, scaleSens * Time.deltaTime);
@@ -30,7 +41,8 @@ public class BoardBlockSc : MonoBehaviour
     {
         blockValue = value;
         GetComponent<SpriteRenderer>().sprite = gameManager.GetBoardBlockSprite(blockValue);
-        transform.localPosition = Vector3.forward * (-1f);
+        transform.localPosition = Vector3.forward;
+        //transform.localPosition = Vector3.forward * (-1f);
     }
 
     public void ResetSameNeighbours()
@@ -86,8 +98,8 @@ public class BoardBlockSc : MonoBehaviour
 
     public void MergeAnim()
     {
-        transform.localPosition = Vector3.MoveTowards(transform.localPosition, Vector3.forward * (-1f), gameManager.mergeSens * Time.deltaTime);
-        if(transform.localPosition == Vector3.forward * (-1f))
+        transform.localPosition = Vector3.MoveTowards(transform.localPosition, Vector3.forward, gameManager.mergeSens * Time.deltaTime);
+        if(transform.localPosition == Vector3.forward)
         {
             Debug.Log("Merged");
             gameManager.ContinueMerge();

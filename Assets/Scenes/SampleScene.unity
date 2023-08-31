@@ -279,7 +279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 948825401f72d10459bf66693fdedbc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mergeSens: 10
+  mergeSens: 14
   comingNumberSprites:
   - {fileID: 21300000, guid: 2acde69ddd5ab584e99ad6e0baedac01, type: 3}
   - {fileID: 21300000, guid: b7342c91918f4b444ab9d06e9efdd140, type: 3}
@@ -314,6 +314,9 @@ MonoBehaviour:
   boardBlockLayerMask:
     serializedVersion: 2
     m_Bits: 8
+  boardCellLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
   mergingGroup: 0
   mergingCenterBlock: {fileID: 0}
   merged: 0
@@ -321,6 +324,7 @@ MonoBehaviour:
   tempAddedScore: 0
   scoreTx: {fileID: 231076564}
   controller: 1
+  lastPressedCell: {fileID: 0}
 --- !u!4 &169288761
 Transform:
   m_ObjectHideFlags: 0
@@ -2592,7 +2596,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1940682884
 RectTransform:
   m_ObjectHideFlags: 0
