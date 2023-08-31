@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static Unity.Collections.AllocatorManager;
 
@@ -13,6 +15,7 @@ public class GameManager : MonoBehaviour
     public Transform upcomingBlockPlace, nextBlockPlace, boardCellsParent;
     public GameObject nextBlockPrefab, boardBlockPrefab;
     public GameObject upcomingBlock, nextBlock, appearScorePrefab;
+    public GameObject finishPanel;
     public Dictionary<GameObject, int> boardCellsDic = new Dictionary<GameObject, int>();
     public List<GameObject> placedCells = new List<GameObject>();
     public float boardDetectRadius = 2;
@@ -37,12 +40,151 @@ public class GameManager : MonoBehaviour
     private int state = 0;
     public GameObject lastPressedCell;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         nextBlock = nextBlockPlace.transform.GetChild(0).gameObject;
-        nextBlockNumber = nextBlock.GetComponent<NextBlockSc>().blockNumber;
-        nextBlock.GetComponent<NextBlockSc>().SetNextBlock(nextBlock.GetComponent<NextBlockSc>().blockNumber);
+
+        int randomInt = UnityEngine.Random.Range(1, 101);
+        int upcomingNumber = 0;
+        switch (state)
+        {
+            case 0:
+                if (randomInt <= 10)
+                {
+                    upcomingNumber = 2;
+                }
+                else if (randomInt <= 20)
+                {
+                    upcomingNumber = 4;
+                }
+                else if (randomInt <= 40)
+                {
+                    upcomingNumber = 8;
+                }
+                else if (randomInt <= 60)
+                {
+                    upcomingNumber = 16;
+                }
+                else if (randomInt <= 80)
+                {
+                    upcomingNumber = 32;
+                }
+                else
+                {
+                    upcomingNumber = 64;
+                }
+                break;
+
+            case 1:
+                if (randomInt <= 5)
+                {
+                    upcomingNumber = 2;
+                }
+                else if (randomInt <= 13)
+                {
+                    upcomingNumber = 4;
+                }
+                else if (randomInt <= 28)
+                {
+                    upcomingNumber = 8;
+                }
+                else if (randomInt <= 48)
+                {
+                    upcomingNumber = 16;
+                }
+                else if (randomInt <= 78)
+                {
+                    upcomingNumber = 32;
+                }
+                else if (randomInt <= 98)
+                {
+                    upcomingNumber = 64;
+                }
+                else
+                {
+                    upcomingNumber = 128;
+                }
+                break;
+
+            case 2:
+                if (randomInt <= 1)
+                {
+                    upcomingNumber = 2;
+                }
+                else if (randomInt <= 3)
+                {
+                    upcomingNumber = 4;
+                }
+                else if (randomInt <= 18)
+                {
+                    upcomingNumber = 8;
+                }
+                else if (randomInt <= 38)
+                {
+                    upcomingNumber = 16;
+                }
+                else if (randomInt <= 68)
+                {
+                    upcomingNumber = 32;
+                }
+                else if (randomInt <= 93)
+                {
+                    upcomingNumber = 64;
+                }
+                else if (randomInt <= 98)
+                {
+                    upcomingNumber = 128;
+                }
+                else
+                {
+                    upcomingNumber = 256;
+                }
+                break;
+
+            case 3:
+                if (randomInt <= 1)
+                {
+                    upcomingNumber = 2;
+                }
+                else if (randomInt <= 3)
+                {
+                    upcomingNumber = 4;
+                }
+                else if (randomInt <= 13)
+                {
+                    upcomingNumber = 8;
+                }
+                else if (randomInt <= 33)
+                {
+                    upcomingNumber = 16;
+                }
+                else if (randomInt <= 60)
+                {
+                    upcomingNumber = 32;
+                }
+                else if (randomInt <= 85)
+                {
+                    upcomingNumber = 64;
+                }
+                else if (randomInt <= 95)
+                {
+                    upcomingNumber = 128;
+                }
+                else
+                {
+                    upcomingNumber = 256;
+                }
+                break;
+        }
+
+        nextBlock.GetComponent<NextBlockSc>().blockNumber = upcomingNumber;
+        nextBlock.GetComponent<SpriteRenderer>().sprite = GetComingBlockSprite(upcomingNumber);
+
+        nextBlock.GetComponent<NextBlockSc>().SetNextBlock(upcomingNumber);
+
+        SetUpcomingNumber();
         tempNextBlockNumber = upcomingBlock.GetComponent<NextBlockSc>().blockNumber;
+        nextBlockNumber = upcomingNumber;
     }
 
     private void Update()
@@ -56,6 +198,12 @@ public class GameManager : MonoBehaviour
         {
             boardPressed = false;
             ReleasedOnBoard();
+        }
+        
+        // Restart the game when the "R" key is pressed
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Restart();
         }
     }
 
@@ -141,7 +289,7 @@ public class GameManager : MonoBehaviour
         {
             RecheckBoardToMerge();
         }
-        //ClearPlacedCells();
+        ClearPlacedCells();
     }
 
     public void RecheckBoardToMerge()
@@ -183,6 +331,30 @@ public class GameManager : MonoBehaviour
                 break;
             }
         }
+        if(controller && IsAllFilled())
+        {
+            FinishGame();
+        }
+    }
+
+    public void FinishGame()
+    {
+        finishPanel.SetActive(true);
+        finishPanel.transform.Find("ScoreCount").GetComponent<Text>().text = score.ToString();
+    }
+
+    public bool IsAllFilled()
+    {
+        bool filled = true;
+        foreach (Transform cell in boardCellsParent)
+        {
+            if (cell.childCount == 0)
+            {
+                filled = false;
+                break;
+            }
+        }
+        return filled;
     }
 
     public void MergeGroup(int mergingGroupId)
@@ -414,6 +586,20 @@ public class GameManager : MonoBehaviour
         placedCells = tempPlacedCells;
     }
 
+    public bool IsPlacedCell(GameObject cell)
+    {
+        bool a = false;
+        foreach(GameObject placedCell in placedCells)
+        {
+            if(placedCell == cell)
+            {
+                a = true;
+                break;
+            }
+        }
+        return a;
+    }
+
     public void SetUpcomingNumber()
     {
         SetState();
@@ -628,13 +814,6 @@ public class GameManager : MonoBehaviour
         return upcomingSprite;
     }
 
-    private void FillBoardCellsDic()
-    {
-        foreach(Transform cell in boardCellsParent)
-        {
-            boardCellsDic.Add(cell.gameObject, 0);
-        }
-    }
 
     public void TestUpcoming()
     {
@@ -646,5 +825,11 @@ public class GameManager : MonoBehaviour
 
         upcomingBlock = null;
         SetUpcomingNumber();
+    }
+    
+    // Reload the current scene to restart the game
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

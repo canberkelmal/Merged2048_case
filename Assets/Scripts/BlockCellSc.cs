@@ -44,13 +44,13 @@ public class BlockCellSc : MonoBehaviour
     }
     private void OnMouseEnter()
     {
-        if (gameManager.boardPressed && gameManager.controller && neighbourCells.Contains(gameManager.lastPressedCell))
+        if (gameManager.boardPressed && gameManager.controller)
         {
-            if (!filled)
+            if (!filled && neighbourCells.Contains(gameManager.lastPressedCell))
             {
                 gameManager.MouseEnterTo(gameObject);
             }
-            else if(filled && gameManager.lastPressedCell != gameObject)
+            else if(filled && gameManager.IsPlacedCell(gameObject) && gameManager.lastPressedCell != gameObject)
             {
                 Debug.Log("Mouse entered to fille.");
                 gameManager.MouseEnterToFilled(gameObject);
