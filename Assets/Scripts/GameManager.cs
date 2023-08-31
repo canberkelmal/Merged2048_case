@@ -462,7 +462,7 @@ public class GameManager : MonoBehaviour
     {
         float nearestDistance = -1f;
         GameObject nearestBlock = null;
-        foreach (Transform cell in boardCellsParent)
+        foreach (Transform cell in boardCellsParent) 
         {
             if (cell.childCount > 0)
             {
@@ -768,6 +768,9 @@ public class GameManager : MonoBehaviour
                 break;
             case 128:
                 upcomingSprite = comingNumberSprites[6];
+                break;
+            case 256:
+                upcomingSprite = boardNumberSprites[7];
                 break;
         }
         return upcomingSprite;
